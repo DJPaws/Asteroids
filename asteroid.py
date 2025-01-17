@@ -19,6 +19,30 @@ class Asteroid(CircleShape):                    # initialize Asteroid using para
             y = point_radius * math.sin(angle)
             points.append((x, y))
         return points
+    
+    def get_points(self):                       # Finds points for collision function
+        return [pygame.Vector2(self.position.x + x, self.position.y + y) 
+                for x, y in self.points]
+    
+    def point_in_polygon(self, point):          # adds detection inside of asteroid for collision
+        local_point = pygame.Vector2(point.x - self.position.x, 
+                               point.y - self.position.y)
+    
+        n = len(self.points)
+        inside = False
+        j = n - 1
+        for i in range(n):
+            pi = pygame.Vector2(self.points[i])
+            pj = pygame.Vector2(self.points[j])
+        
+            if ((pi.y > local_point.y) != (pj.y > local_point.y) and
+                local_point.x < (pj.x - pi.x) * 
+                (local_point.y - pi.y) / 
+                (pj.y - pi.y) + pi.x):
+                inside = not inside
+            j = i
+    
+        return inside
 
     def draw(self, surface):                    # Draw onto screen, using round to limit flicker
         transformed_points = [(round(self.position.x + x), round(self.position.y + y)) 

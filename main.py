@@ -25,10 +25,29 @@ def main():
 	player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 	asteroid_field = AsteroidField()
 
-	while True:														# start main game loop
+	game_over = False
+	running = True
+	while running:
+		dt = my_clock.tick(60) / 1000.0														# start main game loop
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				return
+				running = False
+			if event.type == pygame.KEYDOWN and game_over:
+				if event.key == pygame.K_SPACE:
+					game_over = False
+					updatable.empty()
+					drawable.empty()
+					asteroids.empty()
+					player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+					asteroid_field = AsteroidField()
+
+		if not game_over:
+			updatable.update(dt)
+
+			for asteroid in asteroids:
+				if player.collides_with_asteroid(asteroid):
+					player.destroy()
+					game_over = True
 			
 		for sprite in updatable:									# update sprite positions on screen
 			sprite.update(dt)
@@ -38,10 +57,18 @@ def main():
 		for sprite in drawable:										# draw sprite onto screen
 			sprite.draw(screen)
 
-		pygame.display.flip()										# refresh screen during loop
+		if game_over:
+			font = pygame.font.Font(None, 74)
+			text = font.render('Game Over', True, (255, 255, 255))
+			text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+			screen.blit(text, text_rect)
+			
+			font = pygame.font.Font(None, 36)
+			restart_text = font.render('Press SPACE to restart', True, (255, 255, 255))
+			restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 50))
+			screen.blit(restart_text, restart_rect)
 
-		elapsed_ms = my_clock.tick(60) 								# limit to 60 FPS and returns milliseconds passed
-		dt = elapsed_ms / 1000										# convert to seconds and stores as delta time
+		pygame.display.flip()										# refresh screen during loop
 
 if __name__ == "__main__":
 	main()
